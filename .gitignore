@@ -2,7 +2,7 @@ node_modules
 /index.js
 /build/*
 /docs/*
-/dist/*
+# /dist/*
 .tmp/
 .idea
 .gitconfig
