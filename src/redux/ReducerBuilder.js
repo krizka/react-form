@@ -59,7 +59,7 @@ const setValue = ( state, action ) => {
     value
   } = action;
 
-  let newValues = JSON.parse(JSON.stringify(state.values));
+  let newValues = Utils.clone(state.values);
 
   newValues = Utils.set( newValues, field, value );
 
@@ -71,18 +71,14 @@ const setValue = ( state, action ) => {
 };
 
 const setAllValues = ( state, action ) => {
-
   const {
     values
   } = action;
 
-  const oldValues = JSON.parse(JSON.stringify(state.values));
-
   return {
     ...state,
-    values: { ...oldValues, ...values }
+    values: { ...state.values, ...values }
   };
-
 };
 
 const format = ( state, action ) => {
@@ -91,7 +87,7 @@ const format = ( state, action ) => {
     field
   } = action;
 
-  let newValues = JSON.parse(JSON.stringify(state.values));
+  let newValues = state.values;
 
   newValues = Utils.set( newValues, field, action.format( Utils.get( newValues, field ) ) );
 
@@ -109,7 +105,7 @@ const setTouched = ( state, action ) => {
     touched
   } = action;
 
-  let newTouched = JSON.parse(JSON.stringify(state.touched));
+  let newTouched = state.touched;
 
   newTouched = Utils.set( newTouched, field, touched );
 
@@ -126,7 +122,7 @@ const setAllTouched = ( state, action ) => {
     touched
   } = action;
 
-  const oldTouched = JSON.parse(JSON.stringify(state.touched));
+  const oldTouched = state.touched;
 
   return {
     ...state,
@@ -142,7 +138,7 @@ const setWarning = ( state, action ) => {
     warning
   } = action;
 
-  let newWarnings = JSON.parse(JSON.stringify(state.warnings));
+  let newWarnings = state.warnings;
 
   newWarnings = Utils.set( newWarnings, field, warning );
 
@@ -160,7 +156,7 @@ const setError = ( state, action ) => {
     error
   } = action;
 
-  let newErrors = JSON.parse(JSON.stringify(state.errors));
+  let newErrors = state.errors;
 
   newErrors = Utils.set( newErrors, field, error );
 
@@ -178,7 +174,7 @@ const setSuccess = ( state, action ) => {
     success
   } = action;
 
-  let newSuccesses = JSON.parse(JSON.stringify(state.successes));
+  let newSuccesses = state.successes;
 
   newSuccesses = Utils.set( newSuccesses, field, success );
 
@@ -197,7 +193,7 @@ const setAsyncWarning = ( state, action ) => {
     warning
   } = action;
 
-  const newWarnings = JSON.parse(JSON.stringify(state.asyncWarnings));
+  const newWarnings = state.asyncWarnings;
 
   if ( Array.isArray(field) ) {
     newWarnings[field[0]] = warning;
@@ -220,7 +216,7 @@ const setAsyncError = ( state, action ) => {
     error
   } = action;
 
-  const newErrors = JSON.parse(JSON.stringify(state.asyncErrors));
+  const newErrors = state.asyncErrors;
 
   if ( Array.isArray(field) ) {
     newErrors[field[0]] = error;
@@ -243,7 +239,7 @@ const setAsyncSuccess = ( state, action ) => {
     success
   } = action;
 
-  const newSuccesses = JSON.parse(JSON.stringify(state.asyncSuccesses));
+  const newSuccesses = state.asyncSuccesses;
 
   if ( Array.isArray(field) ) {
     newSuccesses[field[0]] = success;
@@ -265,7 +261,7 @@ const removeAsyncWarning = ( state, action ) => {
     field
   } = action;
 
-  const newWarnings = JSON.parse(JSON.stringify(state.asyncWarnings));
+  const newWarnings = state.asyncWarnings;
 
   if ( Array.isArray(field) ) {
     delete newWarnings[field[0]];
@@ -287,7 +283,7 @@ const removeAsyncError = ( state, action ) => {
     field,
   } = action;
 
-  const newErrors = JSON.parse(JSON.stringify(state.asyncErrors));
+  const newErrors = state.asyncErrors;
 
   if ( Array.isArray(field) ) {
     delete newErrors[field[0]];
@@ -309,7 +305,7 @@ const removeAsyncSuccess = ( state, action ) => {
     field
   } = action;
 
-  const newSuccesses = JSON.parse(JSON.stringify(state.asyncSuccesses));
+  const newSuccesses = state.asyncSuccesses;
 
   if ( Array.isArray(field) ) {
     delete newSuccesses[field[0]];
@@ -330,6 +326,15 @@ const validate = ( state, action, validateError, validateWarning, validateSucces
   let errors = validateError ? validateError( state.values ) : {};
   let warnings = validateWarning ? validateWarning( state.values ) : {};
   let successes = validateSuccess ? validateSuccess( state.values, errors ) : {};
+
+  if (
+    Utils.isShallowEqual(state.errors, errors) &&
+    Utils.isShallowEqual(state.warnings, warnings) &&
+    Utils.isShallowEqual(state.successes, successes)
+  ) {
+    return state;
+  }
+
   errors = { ...state.errors, ...errors };
   warnings = { ...state.warnings, ...warnings };
   successes = { ...state.successes, ...successes };
@@ -342,9 +347,10 @@ const validate = ( state, action, validateError, validateWarning, validateSucces
 };
 
 const preValidate = ( state, action, preValidator ) => {
+  if (!preValidator)
+    return state;
 
-  const values = preValidator ? preValidator( JSON.parse( JSON.stringify( state.values) ) ) : state.values;
-
+  const values = preValidator( state.values );
   return {
     ...state,
     values
@@ -400,7 +406,7 @@ const validatingField = ( state, action ) => {
     field
   } = action;
 
-  const validating = JSON.parse(JSON.stringify(state.validating));
+  const validating = state.validating;
 
   let asyncValidations = state.asyncValidations;
 
@@ -429,7 +435,7 @@ const doneValidatingField = ( state, action ) => {
     field
   } = action;
 
-  const validating = JSON.parse(JSON.stringify(state.validating));
+  const validating = state.validating;
 
   let asyncValidations = state.asyncValidations;
 
@@ -458,7 +464,7 @@ const validationFailure = ( state, action ) => {
     field
   } = action;
 
-  const validationFailed = JSON.parse(JSON.stringify(state.validationFailed));
+  const validationFailed = state.validationFailed;
 
   let validationFailures = state.validationFailures;
 
@@ -489,7 +495,7 @@ const validationSuccess = ( state, action ) => {
 
   let validationFailures = state.validationFailures;
 
-  const validationFailed = JSON.parse(JSON.stringify(state.validationFailed));
+  const validationFailed = state.validationFailed;
 
   if ( Array.isArray(field) ) {
     // Only devcriment faulures if this field is going from true to false

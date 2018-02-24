@@ -53,7 +53,8 @@
   },
   "peerDependencies": {
     "react": "^15.6.1 || 16",
-    "react-dom": "^15.6.1 || 16"
+    "react-dom": "^15.6.1 || 16",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
