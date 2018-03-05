@@ -49,12 +49,11 @@ function flattenDeep(arr, newArr = []) {
 // }
 
 const makePathArray = (obj) => {
-  return isArray(obj) ? obj : [obj];
+  return isArray(obj) ? obj : obj.split('.');
 };
 
 function set(obj = {}, path, value) {
-  const keys = makePathArray(path);
-  let keyPart;
+  const keys = [...makePathArray(path)];
 
   if (typeof keys[0] === 'number' && !isArray(obj)) {
     obj = [];
@@ -64,6 +63,7 @@ function set(obj = {}, path, value) {
 
   let cursor = obj;
 
+  let keyPart;
   while (typeof (keyPart = keys.shift()) !== 'undefined' && keys.length) {
     if (typeof keys[0] === 'number' && !isArray(cursor[keyPart])) {
       cursor[keyPart] = [];
